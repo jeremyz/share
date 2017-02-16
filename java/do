@@ -1,0 +1,6 @@
+#! /bin/sh
+for java in *.java
+do
+    echo "############" && javac $java && java ${java%.java}
+done
+rm *.class
