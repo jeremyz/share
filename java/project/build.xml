@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+         name="MyProject"
+         basedir="."
+         default="test">
+
+    <target name="configure">
+        <property file="${basedir}/src/resources/Application.properties"/>
+        <property name="src.dir"        value="${basedir}/src" />
+        <property name="build.dir"      value="${basedir}/build"/>
+        <property name="dist.dir"       value="${basedir}/dist"/>
+        <property name="doc.dir"        value="${basedir}/doc"/>
+
+        <property name="main.dir"       value="${src.dir}/main" />
+        <property name="test.dir"       value="${src.dir}/test" />
+        <property name="resources.dir"  value="${src.dir}/resources"/>
+        <property name="classes.dir"    value="${build.dir}/classes"/>
+
+        <property name="class.main"     value="ch.asynk.Main"/>
+        <property name="jar.name"       value="${dist.dir}/myjar-${app.version}"/>
+
+        <property name="compile.debug"          value="true"/>
+        <property name="compile.deprecation"    value="false"/>
+        <property name="compile.optimize"       value="true"/>
+        <property name="signatures.remove"      value="true"/>
+
+        <path id="cp.build">
+            <dirset dir="${classes.dir}" />
+        </path>
+        <path id="cp.resources">
+            <dirset dir="${resources.dir}" />
+        </path>
+        <condition property="filter.sign.out">
+            <istrue value="${signatures.remove}"/>
+        </condition>
+
+    </target>
+
+    <target name="resolve" description="retrieve dependencies with Ivy">
+        <ivy:resolve file="ivy.xml" log="download-only"/>
+        <ivy:cachepath pathid="ivy.deps.compile" conf="compile" />
+        <ivy:cachepath pathid="ivy.deps.runtime" conf="runtime" />
+        <ivy:cachepath pathid="ivy.deps.test" conf="test" />
+        <ivy:cachefileset setid="ivy.deps.runtime.fileset" conf="runtime"/>
+    </target>
+
+    <target name="clean" depends="configure" description="clean project">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete file="${app.logfile}" />
+        <delete file="build.log" />
+        <delete file="test.log" />
+    </target>
+
+    <target name="ctags">
+        <exec executable="ctags" failonerror="true">
+            <arg value="-R"/>
+            <arg value="--language-force=java"/>
+            <arg value="-f.tags"/>
+            <arg value="${src.dir}"/>
+        </exec>
+    </target>
+
+    <target name="compile" depends="configure,resolve,ctags">
+        <record name="build.log" loglevel="verbose" action="start" />
+        <mkdir dir="${classes.dir}/main" />
+        <javac srcdir="${main.dir}"
+            destdir="${classes.dir}/main"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="ivy.deps.compile"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+        <mkdir dir="${classes.dir}/test" />
+        <javac srcdir="${test.dir}"
+            destdir="${classes.dir}/test"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.compile"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+    </target>
+
+    <target name="test" description="run JUnit tests" depends="compile">
+        <junit fork="true" dir="${basedir}" failureProperty="test.failed" printsummary="yes" haltonfailure="no">
+            <jvmarg value="-Xmx600M"/>
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.test"/>
+            <formatter type="plain" usefile="true" extension=".log"/>
+            <test name = "ch.asynk.TestSuite" todir="." outfile="test"/>
+        </junit>
+        <fail message="-- FAILED --" if="test.failed" />
+    </target>
+
+    <target name="-jar.deps" if="filter.sign.out">
+        <jar jarfile="${jar.name}-deps.jar">
+            <zipgroupfileset refid="ivy.deps.runtime.fileset"/>
+        </jar>
+    </target>
+
+    <target name="-jar.static" depends="compile">
+        <manifestclasspath property="cp.manifest" jarfile="${jar.name}-static-cp.jar" maxParentLevels="10">
+            <classpath refid="ivy.deps.runtime"/>
+        </manifestclasspath>
+        <jar jarfile="${jar.name}-static-cp.jar" basedir="${classes.dir}/main">
+            <manifest>
+                <attribute name="Main-Class" value="${class.main}"/>
+                <attribute name="Class-Path" value="${cp.manifest}"/>
+            </manifest>
+            <fileset dir="${src.dir}/resources"/>
+        </jar>
+    </target>
+
+    <target name="-jar.fat" depends="compile,-jar.deps">
+        <jar jarfile="${jar.name}-fat.jar" basedir="${classes.dir}/main">
+            <manifest>
+                <attribute name="Main-Class" value="${class.main}"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${src.dir}/resources"/>
+            <!-- FIXES Invalid signature file digest for Manifest main attributes -->
+            <!-- TODO use filter.sign.out -->
+            <zipfileset src="${jar.name}-deps.jar" excludes="META-INF/*.SF" />
+            <!-- <zipgroupfileset refid="ivy.deps.runtime.fileset"/> -->
+        </jar>
+        <!-- FIXES Invalid signature file digest for Manifest main attributes -->
+        <!-- <exec executable="zip"> -->
+        <!--     <arg value="-d"/> -->
+        <!--     <arg value="${jar.name}-fat.jar"/> -->
+        <!--     <arg value="META-INF/*.SF"/> -->
+        <!-- </exec> -->
+    </target>
+
+    <target name="-jar.src" depends="compile">
+        <jar jarfile="${jar.name}-src.jar" basedir="${basedir}" excludes="build/** dist/** *.log .tags" />
+    </target>
+
+    <target name="-jar.dir" depends="configure">
+        <mkdir dir="${dist.dir}" />
+    </target>
+
+    <target name="dist" description="generate the distribution" depends="-jar.dir,-jar.static,-jar.fat,-jar.src"/>
+
+    <target name="run" description="execute built main Class" depends="compile">
+        <java classname="${class.main}" fork="true">
+            <classpath refid="cp.build"/>
+            <classpath refid="cp.resources"/>
+            <classpath refid="ivy.deps.runtime"/>
+        </java>
+    </target>
+
+    <target name="run.jar" description="execute built jars" depends="dist">
+        <java jar="${jar.name}-static-cp.jar" fork="true"/>
+        <java jar="${jar.name}-fat.jar" fork="true"/>
+    </target>
+
+</project>

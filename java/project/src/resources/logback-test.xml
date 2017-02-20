@@ -1,0 +1,34 @@
+<configuration debug="true">
+
+    <contextName>MyApp</contextName>
+    <property resource="Application.properties" />
+    <property name="LOG_LEVEL" value="INFO" />
+    <property name="LOG_REF" value="FILE" />
+    <property name="LOG_FILE" value="${app.logfile}" />
+    <property name="LOG_PATTERN" value="%contextName %date{ISO8601} [%-5level %thread] [%file:%line] - %msg%n" />
+
+    <if condition='property("app.env").contains("DEV")'>
+        <then>
+            <property name="LOG_LEVEL" value="DEBUG" />
+            <property name="LOG_REF" value="STDOUT" />
+        </then>
+    </if>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE}</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="${LOG_REF}" />
+    </root>
+
+</configuration>
