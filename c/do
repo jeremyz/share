@@ -1,0 +1,6 @@
+#! /bin/sh
+for c in *.c
+do
+    echo "############" && clang -pedantic -Wall -ldl $c -o ./bin && ./bin
+done
+rm ./bin
