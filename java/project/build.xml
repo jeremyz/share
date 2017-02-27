@@ -5,7 +5,7 @@
          default="test">
 
     <target name="configure">
-        <property file="${basedir}/src/resources/Application.properties"/>
+        <property file="${basedir}/src/main/resources/Application.properties"/>
         <property name="src.dir"        value="${basedir}/src" />
         <property name="build.dir"      value="${basedir}/build"/>
         <property name="dist.dir"       value="${basedir}/dist"/>
@@ -13,7 +13,7 @@
 
         <property name="main.dir"       value="${src.dir}/main" />
         <property name="test.dir"       value="${src.dir}/test" />
-        <property name="resources.dir"  value="${src.dir}/resources"/>
+        <property name="resources.dir"  value="${main.dir}/resources"/>
         <property name="classes.dir"    value="${build.dir}/classes"/>
 
         <property name="class.main"     value="ch.asynk.Main"/>
@@ -120,7 +120,7 @@
                 <attribute name="Main-Class" value="${class.main}"/>
                 <attribute name="Class-Path" value="${cp.manifest}"/>
             </manifest>
-            <fileset dir="${src.dir}/resources"/>
+            <fileset dir="${resources.dir}"/>
         </jar>
     </target>
 
@@ -130,7 +130,7 @@
                 <attribute name="Main-Class" value="${class.main}"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <fileset dir="${src.dir}/resources"/>
+            <fileset dir="${resources.dir}"/>
             <!-- FIXES Invalid signature file digest for Manifest main attributes -->
             <!-- TODO use filter.sign.out -->
             <zipfileset src="${jar.name}-deps.jar" excludes="META-INF/*.SF" />
