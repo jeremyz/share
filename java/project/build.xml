@@ -6,13 +6,13 @@
 
     <target name="configure">
         <property file="${basedir}/src/main/resources/Application.properties"/>
-        <property name="src.dir"        value="${basedir}/src" />
         <property name="build.dir"      value="${basedir}/build"/>
         <property name="dist.dir"       value="${basedir}/dist"/>
         <property name="doc.dir"        value="${basedir}/doc"/>
 
-        <property name="main.dir"       value="${src.dir}/main" />
-        <property name="test.dir"       value="${src.dir}/test" />
+        <property name="main.dir"       value="${basedir}/src/main" />
+        <property name="test.dir"       value="${basedir}/src/test" />
+        <property name="src.dir"        value="${main.dir}/java" />
         <property name="resources.dir"  value="${main.dir}/resources"/>
         <property name="classes.dir"    value="${build.dir}/classes"/>
 
@@ -64,7 +64,7 @@
     <target name="compile" depends="configure,resolve,ctags">
         <record name="build.log" loglevel="verbose" action="start" />
         <mkdir dir="${classes.dir}/main" />
-        <javac srcdir="${main.dir}"
+        <javac srcdir="${src.dir}"
             destdir="${classes.dir}/main"
             debug="${compile.debug}"
             deprecation="${compile.deprecation}"
