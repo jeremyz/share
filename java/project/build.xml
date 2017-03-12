@@ -53,7 +53,7 @@
     </target>
 
     <target name="ctags">
-        <exec executable="ctags" failonerror="true">
+        <exec executable="ctags" failonerror="false">
             <arg value="-R"/>
             <arg value="--language-force=java"/>
             <arg value="-f.tags"/>
