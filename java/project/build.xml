@@ -62,7 +62,7 @@
         </delete>
     </target>
 
-    <target name="ctags">
+    <target name="ctags" depends="configure">
         <exec executable="ctags" failonerror="false">
             <arg value="-R"/>
             <arg value="--language-force=java"/>
