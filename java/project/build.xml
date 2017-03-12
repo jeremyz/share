@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
-         name="MyProject"
+         name="AntIvyJUnit"
          basedir="."
          default="test">
 
@@ -44,12 +44,22 @@
         <ivy:cachefileset setid="ivy.deps.runtime.fileset" conf="runtime"/>
     </target>
 
+    <target name="ivy-report" depends="configure,resolve">
+        <ivy:report conf="compile" organisation="ch.asynk" module="${app.name}"/>
+        <ivy:report conf="runtime" organisation="ch.asynk" module="${app.name}"/>
+        <ivy:report conf="test" organisation="ch.asynk" module="${app.name}"/>
+    </target>
+
     <target name="clean" depends="configure" description="clean project">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
         <delete file="${app.logfile}" />
         <delete file="build.log" />
         <delete file="test.log" />
+        <delete file="ivy-report.css" />
+        <delete>
+            <fileset dir="${basedir}" includes="ch.asynk-${app.name}-*"/>
+        </delete>
     </target>
 
     <target name="ctags">
