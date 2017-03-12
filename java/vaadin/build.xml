@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+    name="My Vaadin Hello World"
+    basedir="."
+    default="package-war">
+
+    <target name="configure">
+        <property file="${basedir}/Application.properties"/>
+
+        <property name="main.dir"       value="${basedir}/src/main" />
+        <property name="build.dir"      value="${basedir}/build"/>
+        <property name="dist.dir"       value="${basedir}/dist"/>
+
+        <property name="src.dir"        value="${main.dir}/java" />
+        <property name="web.dir"        value="${main.dir}/WebContent"/>
+        <property name="classes.dir"    value="${build.dir}/WEB-INF/classes"/>
+        <property name="lib.dir"        value="${build.dir}/WEB-INF/lib"/>
+
+        <property name="war.name"       value="${app.name}-${app.version}.war"/>
+
+        <property name="compile.debug"          value="true"/>
+        <property name="compile.deprecation"    value="false"/>
+        <property name="compile.optimize"       value="true"/>
+
+        <property file="${basedir}/tomcat.properties"/>
+        <path id="cp.tomcat">
+            <fileset dir="${catalina.home}/bin">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${catalina.home}/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+        <taskdef classpathref="cp.tomcat" resource="org/apache/catalina/ant/catalina.tasks" />
+    </target>
+
+
+    <target name="resolve" description="retrieve dependencies with Ivy">
+        <ivy:resolve file="ivy.xml" log="download-only"/>
+        <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
+        <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
+    </target>
+
+    <target name="ivy-report" depends="configure,resolve">
+        <ivy:report conf="default" organisation="ch.asynk" module="${app.name}"/>
+    </target>
+
+    <target name="clean" depends="configure" description="clean project">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete file="build.log" />
+        <delete file="test.log" />
+        <delete file="ivy-report.css" />
+        <delete>
+            <fileset dir="${basedir}" includes="ch.asynk-${app.name}-*"/>
+        </delete>
+    </target>
+
+    <target name="ctags" depends="configure">
+        <exec executable="ctags" failonerror="false">
+            <arg value="-R"/>
+            <arg value="--language-force=java"/>
+            <arg value="-f.tags"/>
+            <arg value="${src.dir}"/>
+        </exec>
+    </target>
+
+    <target name="compile-server-side" depends="configure,resolve,ctags">
+        <record name="build.log" loglevel="verbose" action="start" />
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${main.dir}"
+            destdir="${classes.dir}"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="ivy.deps.server-side"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+    </target>
+
+    <target name="package-war" depends="compile-server-side">
+        <mkdir dir="${lib.dir}"/>
+        <copy todir="${lib.dir}" flatten="true">
+            <fileset refid="ivy.deps.server-side.fileset"/>
+        </copy>
+        <delete>
+            <fileset dir="${lib.dir}">
+                <include name="**/*-sources.jar"/>
+                <include name="**/*-javadoc.jar"/>
+            </fileset>
+        </delete>
+
+        <delete file="${dist.dir}/${war.name}"/>
+        <war destfile="${dist.dir}/${war.name}"
+            webxml="${web.dir}/WEB-INF/web.xml">
+            <classes dir="${classes.dir}" includes="**" />
+            <fileset dir="${web.dir}">
+                <patternset>
+                    <include name="images/**/*" />
+                    <include name="VAADIN/widgetsets/**/*" />
+                    <include name="*.html" />
+                    <include name="WEB-INF/lib/*" />
+                    <include name="WEB-INF/*.xml" />
+                </patternset>
+            </fileset>
+            <fileset dir="${build.dir}">
+                <include name="WEB-INF/lib/*" />
+                <include name="VAADIN/themes/**/*" />
+            </fileset>
+        </war>
+    </target>
+
+    <!-- tomcat specific targets -->
+
+    <target name="remove" description="Remove application on servlet container">
+        <undeploy url="${manager.url}"
+            username="${manager.username}"
+            password="${manager.password}"
+            path="${app.path}"
+            failonerror="false"/>
+    </target>
+
+
+    <target name="install" depends="package-war,remove" description="Install application to servlet container">
+        <copy  todir="/tmp" file="${dist.dir}/${war.name}"/>
+        <deploy url="${manager.url}"
+            username="${manager.username}"
+            password="${manager.password}"
+            path="${app.path}"
+            localWar="file://tmp/${war.name}"/>
+        <delete file="/tmp/${war.name}"/>
+    </target>
+
+</project>
