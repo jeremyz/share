@@ -5,7 +5,7 @@
     default="package-war">
 
     <target name="configure">
-        <property file="${basedir}/Application.properties"/>
+        <property file="${basedir}/src/main/resources/Application.properties"/>
 
         <property name="main.dir"       value="${basedir}/src/main" />
         <property name="build.dir"      value="${basedir}/build"/>
@@ -13,6 +13,7 @@
 
         <property name="src.dir"        value="${main.dir}/java" />
         <property name="web.dir"        value="${main.dir}/WebContent"/>
+        <property name="resources.dir"  value="${main.dir}/resources"/>
         <property name="classes.dir"    value="${build.dir}/WEB-INF/classes"/>
         <property name="lib.dir"        value="${build.dir}/WEB-INF/lib"/>
 
@@ -42,7 +43,7 @@
     </target>
 
     <target name="ivy-report" depends="configure,resolve">
-        <ivy:report conf="default" organisation="ch.asynk" module="${app.name}"/>
+        <ivy:report conf="server-side" organisation="ch.asynk" module="${app.name}"/>
     </target>
 
     <target name="clean" depends="configure" description="clean project">
@@ -94,6 +95,9 @@
                 <include name="**/*-javadoc.jar"/>
             </fileset>
         </delete>
+        <copy todir="${classes.dir}" flatten="true">
+            <fileset dir="${resources.dir}"/>
+        </copy>
 
         <delete file="${dist.dir}/${war.name}"/>
         <war destfile="${dist.dir}/${war.name}"
@@ -117,7 +121,7 @@
 
     <!-- tomcat specific targets -->
 
-    <target name="remove" description="Remove application on servlet container">
+    <target name="remove" depends="configure" description="Remove application on servlet container">
         <undeploy url="${manager.url}"
             username="${manager.username}"
             password="${manager.password}"
