@@ -39,6 +39,7 @@
     <target name="resolve" description="retrieve dependencies with Ivy">
         <ivy:resolve file="ivy.xml" log="download-only"/>
         <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
+        <ivy:cachepath pathid="ivy.deps.themes" conf="themes" />
         <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
     </target>
 
@@ -66,7 +67,28 @@
         </exec>
     </target>
 
-    <target name="compile-server-side" depends="configure,resolve,ctags">
+    <target name="-compile-theme" depends="configure,resolve">
+        <property name="theme.dir"       value="${build.dir}/VAADIN/themes/${theme}" />
+        <delete dir="${theme.dir}"/>
+        <mkdir dir="${theme.dir}"/>
+        <java classname="com.vaadin.sass.SassCompiler" failonerror="yes" fork="true">
+            <classpath refid="ivy.deps.themes"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <arg value="-ignore-warnings:true"/>
+            <arg value="-compress:true"/>
+            <arg value="-minify:true"/>
+            <arg value="${web.dir}/VAADIN/themes/${theme}/styles.scss"/>
+            <arg value="${theme.dir}/styles.css"/>
+        </java>
+    </target>
+
+    <target name="compile-themes" description="compile application's themes">
+        <antcall target="-compile-theme">
+            <param name="theme" value="mytheme"/>
+        </antcall>
+    </target>
+
+    <target name="compile-server-side" description="compile server side components" depends="configure,resolve,ctags">
         <record name="build.log" loglevel="verbose" action="start" />
         <mkdir dir="${classes.dir}" />
         <javac srcdir="${main.dir}"
@@ -84,7 +106,9 @@
         </javac>
     </target>
 
-    <target name="package-war" depends="compile-server-side">
+    <target name="compile.all" description="compile everything" depends="compile-server-side,compile-themes"/>
+
+    <target name="package-war" depends="compile.all">
         <mkdir dir="${lib.dir}"/>
         <copy todir="${lib.dir}" flatten="true">
             <fileset refid="ivy.deps.server-side.fileset"/>
@@ -105,11 +129,13 @@
             <classes dir="${classes.dir}" includes="**" />
             <fileset dir="${web.dir}">
                 <patternset>
-                    <include name="images/**/*" />
-                    <include name="VAADIN/widgetsets/**/*" />
                     <include name="*.html" />
                     <include name="WEB-INF/lib/*" />
                     <include name="WEB-INF/*.xml" />
+                    <include name="VAADIN/widgetsets/**/*" />
+                    <include name="VAADIN/themes/**/fonts/**/*" />
+                    <include name="VAADIN/themes/**/icons/**/*" />
+                    <include name="VAADIN/themes/**/images/**/*" />
                 </patternset>
             </fileset>
             <fileset dir="${build.dir}">
@@ -121,7 +147,7 @@
 
     <!-- tomcat specific targets -->
 
-    <target name="remove" depends="configure" description="Remove application on servlet container">
+    <target name="remove" depends="configure" description="remove application on servlet container">
         <undeploy url="${manager.url}"
             username="${manager.username}"
             password="${manager.password}"
@@ -130,7 +156,7 @@
     </target>
 
 
-    <target name="install" depends="package-war,remove" description="Install application to servlet container">
+    <target name="install" depends="package-war,remove" description="install application to servlet container">
         <copy  todir="/tmp" file="${dist.dir}/${war.name}"/>
         <deploy url="${manager.url}"
             username="${manager.username}"

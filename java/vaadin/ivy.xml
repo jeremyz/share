@@ -10,6 +10,7 @@
 
     <configurations>
         <conf name="server-side" description="only needed for server side classes compilation"/>
+        <conf name="themes" extends="server-side" description="needed for theme compilation"/>
     </configurations>
 
     <dependencies defaultconf="server-side" defaultconfmapping="server-side->default">
@@ -18,5 +19,6 @@
         <dependency org="com.vaadin" name="vaadin-client-compiled" rev="&vaadin.version;"/>
         <dependency org="ch.qos.logback" name="logback-classic" rev="1.2.1"/>
         <dependency org="org.codehaus.janino" name="janino" rev="3.0.6"/>
+        <dependency org="com.yahoo.platform.yui" name="yuicompressor" rev="2.4.8" conf="themes->default"/>
     </dependencies>
 </ivy-module>

@@ -1,0 +1,15 @@
+
+@import "../valo/valo.scss";
+
+@mixin mytheme {
+    @include valo;
+
+    .v-app {
+        background-color: #e6e6e9;
+    }
+    .v-button {
+        color: #ff6660;
+        background-image: none;
+        background-color: #eee666;
+    }
+}

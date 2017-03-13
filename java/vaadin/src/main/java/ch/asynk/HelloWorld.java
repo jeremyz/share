@@ -3,6 +3,7 @@ package ch.asynk;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -15,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Title("Hello!!")
-@Theme("valo")
+@Theme("mytheme")
 public class HelloWorld extends UI
 {
     private static final long serialVersionUID = 511085335415683713L;
@@ -28,8 +29,9 @@ public class HelloWorld extends UI
         VerticalLayout content = new VerticalLayout();
         setContent(content);
 
-        content.addComponent(new Label("Hello World!"));
-        content.addComponent(new Button("Push Me!", new ClickListener() {
+        content.addComponent(new Label("Hello World using mytheme"));
+        Button btn = new Button("Push Me!", new ThemeResource("icons/home.png"));
+        btn.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 5808429544582385114L;
             @Override
             public void buttonClick(ClickEvent event) {
@@ -42,6 +44,7 @@ public class HelloWorld extends UI
                 logger.warn("warn");
                 logger.error("error");
             }
-        }));
+        });
+        content.addComponent(btn);
     }
 }
