@@ -11,14 +11,20 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Title("Hello!!")
 @Theme("valo")
 public class HelloWorld extends UI
 {
     private static final long serialVersionUID = 511085335415683713L;
+    private static Logger logger = null;
+
     @Override
     protected void init(VaadinRequest request)
     {
+        logger = LoggerFactory.getLogger(this.getClass());
         VerticalLayout content = new VerticalLayout();
         setContent(content);
 
@@ -28,6 +34,13 @@ public class HelloWorld extends UI
             @Override
             public void buttonClick(ClickEvent event) {
                 Notification.show("Pushed!");
+                System.out.println("System.out");
+                System.err.println("System.err");
+                logger.trace("trace");
+                logger.debug("debug");
+                logger.info("info");
+                logger.warn("warn");
+                logger.error("error");
             }
         }));
     }
