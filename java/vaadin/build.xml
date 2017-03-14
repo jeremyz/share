@@ -97,6 +97,7 @@
             deprecation="${compile.deprecation}"
             optimize="${compile.optimize}"
             includeantruntime="false">
+            <classpath refid="cp.tomcat"/>
             <classpath refid="ivy.deps.server-side"/>
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-path"/>

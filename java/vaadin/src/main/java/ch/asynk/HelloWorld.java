@@ -1,5 +1,6 @@
 package ch.asynk;
 
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.VaadinRequest;
@@ -15,6 +16,7 @@ import com.vaadin.ui.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@PreserveOnRefresh
 @Title("Hello!!")
 @Theme("mytheme")
 public class HelloWorld extends UI
