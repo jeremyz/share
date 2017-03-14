@@ -9,8 +9,8 @@
         <chain name="default">
             <ibiblio name="maven2" m2compatible="true"/>
             <ibiblio name="maven" m2compatible="true" usepoms="false"/>
-            <!-- <ibiblio name="vaadin-addons" usepoms="true" m2compatible="true" -->
-            <!--     root="http://maven.vaadin.com/vaadin-addons" /> -->
+            <ibiblio name="vaadin-addons" usepoms="true" m2compatible="true"
+                root="http://maven.vaadin.com/vaadin-addons" />
             <!-- <ibiblio name="vaadin-prereleases" usepoms="true" m2compatible="true" -->
             <!--     root="http://maven.vaadin.com/vaadin-prereleases" /> -->
             <filesystem name="local"> 

@@ -8,6 +8,7 @@
         <property file="${basedir}/src/main/resources/Application.properties"/>
 
         <property name="main.dir"       value="${basedir}/src/main" />
+        <property name="run.dir"       value="${basedir}/src/run" />
         <property name="build.dir"      value="${basedir}/build"/>
         <property name="dist.dir"       value="${basedir}/dist"/>
 
@@ -18,6 +19,7 @@
         <property name="lib.dir"        value="${build.dir}/WEB-INF/lib"/>
 
         <property name="war.name"       value="${app.name}-${app.version}.war"/>
+        <property name="run.name"      value="ch.asynk.Main"/>
 
         <property name="compile.debug"          value="true"/>
         <property name="compile.deprecation"    value="false"/>
@@ -33,6 +35,9 @@
             </fileset>
         </path>
         <taskdef classpathref="cp.tomcat" resource="org/apache/catalina/ant/catalina.tasks" />
+        <path id="cp.build">
+            <dirset dir="${classes.dir}" />
+        </path>
     </target>
 
 
@@ -40,6 +45,7 @@
         <ivy:resolve file="ivy.xml" log="download-only"/>
         <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
         <ivy:cachepath pathid="ivy.deps.themes" conf="themes" />
+        <ivy:cachepath pathid="ivy.deps.run" conf="run" />
         <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
     </target>
 
@@ -55,6 +61,7 @@
         <delete file="ivy-report.css" />
         <delete>
             <fileset dir="${basedir}" includes="ch.asynk-${app.name}-*"/>
+            <fileset dir="${basedir}" includes="**/*.cache"/>
         </delete>
     </target>
 
@@ -144,6 +151,31 @@
                 <include name="VAADIN/themes/**/*" />
             </fileset>
         </war>
+    </target>
+
+    <target name="run.compile" depends="configure,resolve">
+        <mkdir dir="${classes.dir}/test" />
+        <javac srcdir="${run.dir}"
+            destdir="${classes.dir}/test"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.run"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+    </target>
+
+    <target name="run" depends="compile-server-side,run.compile">
+        <java classname="${run.name}" fork="true">
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.run"/>
+        </java>
     </target>
 
     <!-- tomcat specific targets -->
