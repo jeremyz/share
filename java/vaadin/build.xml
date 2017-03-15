@@ -154,9 +154,9 @@
     </target>
 
     <target name="run.compile" depends="configure,resolve">
-        <mkdir dir="${classes.dir}/test" />
+        <mkdir dir="${build.dir}/run" />
         <javac srcdir="${run.dir}"
-            destdir="${classes.dir}/test"
+            destdir="${build.dir}/run"
             debug="${compile.debug}"
             deprecation="${compile.deprecation}"
             optimize="${compile.optimize}"
@@ -173,6 +173,9 @@
 
     <target name="run" depends="compile-server-side,run.compile">
         <java classname="${run.name}" fork="true">
+            <classpath>
+                <dirset dir="${build.dir}/run" />
+            </classpath>
             <classpath refid="cp.build"/>
             <classpath refid="ivy.deps.run"/>
         </java>
