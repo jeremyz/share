@@ -127,29 +127,25 @@
                 <include name="**/*-javadoc.jar"/>
             </fileset>
         </delete>
-        <copy todir="${classes.dir}" flatten="true">
-            <fileset dir="${resources.dir}"/>
-        </copy>
 
         <delete file="${dist.dir}/${war.name}"/>
         <war destfile="${dist.dir}/${war.name}"
             webxml="${web.dir}/WEB-INF/web.xml">
+            <zipfileset dir="${resources.dir}" prefix="WEB-INF/classes"/>
             <classes dir="${classes.dir}" includes="**" />
+            <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
             <fileset dir="${web.dir}">
                 <patternset>
                     <include name="*.html" />
-                    <include name="WEB-INF/lib/*" />
-                    <include name="WEB-INF/*.xml" />
                     <include name="VAADIN/widgetsets/**/*" />
                     <include name="VAADIN/themes/**/fonts/**/*" />
                     <include name="VAADIN/themes/**/icons/**/*" />
                     <include name="VAADIN/themes/**/images/**/*" />
+                    <include name="WEB-INF/lib/*" />
+                    <include name="WEB-INF/*.xml" />
                 </patternset>
             </fileset>
-            <fileset dir="${build.dir}">
-                <include name="WEB-INF/lib/*" />
-                <include name="VAADIN/themes/**/*" />
-            </fileset>
+            <zipfileset dir="${lib.dir}" prefix="WEB-INF/lib"/>
         </war>
     </target>
 
