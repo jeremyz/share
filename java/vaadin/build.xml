@@ -2,13 +2,13 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
     name="My Vaadin Hello World"
     basedir="."
-    default="package-war">
+    default="war">
 
     <target name="configure">
         <property file="${basedir}/src/main/resources/Application.properties"/>
 
         <property name="main.dir"       value="${basedir}/src/main" />
-        <property name="run.dir"       value="${basedir}/src/run" />
+        <property name="run.dir"        value="${basedir}/src/run" />
         <property name="build.dir"      value="${basedir}/build"/>
         <property name="dist.dir"       value="${basedir}/dist"/>
 
@@ -19,7 +19,8 @@
         <property name="lib.dir"        value="${build.dir}/WEB-INF/lib"/>
 
         <property name="war.name"       value="${app.name}-${app.version}.war"/>
-        <property name="run.name"      value="ch.asynk.Main"/>
+        <property name="jar.name"       value="${app.name}-${app.version}.jar"/>
+        <property name="run.name"       value="ch.asynk.Main"/>
 
         <property name="compile.debug"          value="true"/>
         <property name="compile.deprecation"    value="false"/>
@@ -46,6 +47,7 @@
         <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
         <ivy:cachepath pathid="ivy.deps.themes" conf="themes" />
         <ivy:cachepath pathid="ivy.deps.run" conf="run" />
+        <ivy:cachefileset setid="ivy.deps.run.fileset" conf="run" />
         <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
     </target>
 
@@ -74,7 +76,7 @@
         </exec>
     </target>
 
-    <target name="-compile-theme" depends="configure,resolve">
+    <target name="-compile.theme" >
         <property name="theme.dir"       value="${build.dir}/VAADIN/themes/${theme}" />
         <delete dir="${theme.dir}"/>
         <mkdir dir="${theme.dir}"/>
@@ -89,13 +91,13 @@
         </java>
     </target>
 
-    <target name="compile-themes" description="compile application's themes">
-        <antcall target="-compile-theme">
+    <target name="compile.themes" description="compile application's themes" depends="configure,resolve">
+        <antcall target="-compile.theme" inheritRefs="true">
             <param name="theme" value="mytheme"/>
         </antcall>
     </target>
 
-    <target name="compile-server-side" description="compile server side components" depends="configure,resolve,ctags">
+    <target name="compile.app" description="compile server side components" depends="configure,resolve,ctags">
         <record name="build.log" loglevel="verbose" action="start" />
         <mkdir dir="${classes.dir}" />
         <javac srcdir="${main.dir}"
@@ -114,9 +116,9 @@
         </javac>
     </target>
 
-    <target name="compile.all" description="compile everything" depends="compile-server-side,compile-themes"/>
+    <target name="compile.all" description="compile everything" depends="compile.app,compile.themes"/>
 
-    <target name="package-war" depends="compile.all">
+    <target name="war" description="build war package" depends="configure,resolve">
         <mkdir dir="${lib.dir}"/>
         <copy todir="${lib.dir}" flatten="true">
             <fileset refid="ivy.deps.server-side.fileset"/>
@@ -149,7 +151,7 @@
         </war>
     </target>
 
-    <target name="run.compile" depends="configure,resolve">
+    <target name="compile.run" depends="configure,resolve">
         <mkdir dir="${build.dir}/run" />
         <javac srcdir="${run.dir}"
             destdir="${build.dir}/run"
@@ -167,13 +169,59 @@
         </javac>
     </target>
 
-    <target name="run" depends="compile-server-side,run.compile">
+    <target name="run" description="run jetty in source tree" depends="configure,resolve">
         <java classname="${run.name}" fork="true">
             <classpath>
                 <dirset dir="${build.dir}/run" />
+                <dirset dir="${resources.dir}" />
+                <dirset dir="${run.dir}/resources" />
             </classpath>
             <classpath refid="cp.build"/>
             <classpath refid="ivy.deps.run"/>
+            <jvmarg value="-DTEST=1"/>
+        </java>
+    </target>
+
+    <target name="-jar.deps.check" unless="-jar.deps.exists">
+        <available property="-jar.deps.exists" file="dist/deps.jar"/>
+    </target>
+
+    <target name="-jar.deps" unless="-jar.deps.exists" depends="configure,resolve">
+        <jar jarfile="dist/deps.jar">
+            <zipgroupfileset refid="ivy.deps.run.fileset"/>
+        </jar>
+    </target>
+
+    <target name="jar" depends="-jar.deps.check,-jar.deps">
+        <delete file="${dist.dir}/${jar.name}"/>
+        <jar jarfile="${dist.dir}/${jar.name}">
+            <manifest>
+                <attribute name="Main-Class" value="${run.name}"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${resources.dir}"/>
+            <fileset dir="${run.dir}/resources"/>
+            <fileset dir="${classes.dir}"/>
+            <fileset dir="${build.dir}/run"/>
+            <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
+            <fileset dir="${web.dir}">
+                <patternset>
+                    <include name="WEB-INF/*.xml" />
+                    <include name="WEB-INF/lib/*" />
+                    <include name="*.html" />
+                    <include name="VAADIN/widgetsets/**/*" />
+                    <include name="VAADIN/themes/**/fonts/**/*" />
+                    <include name="VAADIN/themes/**/icons/**/*" />
+                    <include name="VAADIN/themes/**/images/**/*" />
+                </patternset>
+            </fileset>
+            <zipfileset src="dist/deps.jar" excludes="META-INF/*"/>
+        </jar>
+    </target>
+
+    <target name="run.jar" description="run jetty from application jar" depends="configure">
+        <java jar="${dist.dir}/${jar.name}" fork="true">
+            <jvmarg value="-DTEST=1"/>
         </java>
     </target>
 
@@ -188,7 +236,7 @@
     </target>
 
 
-    <target name="install" depends="package-war,remove" description="install application to servlet container">
+    <target name="install" depends="war,remove" description="install application to servlet container">
         <copy  todir="/tmp" file="${dist.dir}/${war.name}"/>
         <deploy url="${manager.url}"
             username="${manager.username}"

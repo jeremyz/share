@@ -13,16 +13,9 @@
         </then>
     </if>
 
-    <if condition='isDefined("TEST_DB")'>
+    <if condition='isDefined("TEST")'>
         <then>
-            <property name="LOG_LEVEL" value="DEBUG" />
-            <property name="LOG_REF" value="FILE" />
-            <property name="LOG_FILE" value="./tests/logs" />
-        </then>
-    </if>
-
-    <if condition='isDefined("TEST_PDF")'>
-        <then>
+            <property name="LOG_FILE" value="/tmp/${app.name}.log" />
             <property name="LOG_LEVEL" value="DEBUG" />
             <property name="LOG_REF" value="STDOUT" />
         </then>

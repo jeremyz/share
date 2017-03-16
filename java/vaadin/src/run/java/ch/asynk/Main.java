@@ -6,6 +6,8 @@ public class Main
 {
     public static void main(String[] args) throws Exception
     {
-        new VaadinJettyServer(8080, HelloWorld.class, "./src/main/WebContent/").start();
+        String webRoot = System.getProperty("WEBROOT");
+        if (webRoot == null) webRoot = "./src/main/WebContent/";
+        new VaadinJettyServer(8080, HelloWorld.class, webRoot).start();
     }
 }
