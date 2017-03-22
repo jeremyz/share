@@ -192,7 +192,7 @@
         </jar>
     </target>
 
-    <target name="jar" depends="-jar.deps.check,-jar.deps">
+    <target name="jar" description="build runnable jar" depends="-jar.deps.check,-jar.deps">
         <delete file="${dist.dir}/${jar.name}"/>
         <jar jarfile="${dist.dir}/${jar.name}">
             <manifest>
