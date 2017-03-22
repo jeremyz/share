@@ -21,6 +21,6 @@
         <dependency org="ch.qos.logback" name="logback-classic" rev="1.2.1"/>
         <dependency org="org.codehaus.janino" name="janino" rev="3.0.6"/>
         <dependency org="com.yahoo.platform.yui" name="yuicompressor" rev="2.4.8" conf="themes->default"/>
-        <dependency org="org.vaadin.jetty" name="jetty-vaadin" rev="2.0" conf="run->default"/>
+        <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.2.v20170220" conf="run->default"/>
     </dependencies>
 </ivy-module>
