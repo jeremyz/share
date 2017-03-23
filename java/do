@@ -3,4 +3,7 @@ for java in *.java
 do
     echo "############" && javac $java && java ${java%.java}
 done
+pushd MyMyBatis > /dev/null
+rm -fr build && ant && rm -fr build
+popd
 rm *.class

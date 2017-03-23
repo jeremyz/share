@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+    name="MyMyBatis"
+    basedir="."
+    default="test">
+
+    <target name="resolve" description="retrieve dependencies with Ivy">
+        <ivy:resolve file="ivy.xml" log="download-only"/>
+        <ivy:cachepath pathid="ivy.deps.default" conf="default" />
+    </target>
+
+    <target name="compile" depends="resolve">
+        <mkdir dir="./build" />
+        <javac srcdir="./src"
+            destdir="./build"
+            includeantruntime="false">
+            <classpath refid="ivy.deps.default"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-processing"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compile">
+        <java classname="ch.asynk.Main" fork="true">
+            <classpath>
+                <dirset dir="./src"/>
+                <dirset dir="./build"/>
+            </classpath>
+            <classpath refid="ivy.deps.default"/>
+        </java>
+    </target>
+
+</project>
