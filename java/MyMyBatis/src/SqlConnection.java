@@ -27,7 +27,7 @@ public class SqlConnection
 
     public SqlConnection()
     {
-        this.logger = logger = LoggerFactory.getLogger(Main.class);
+        this.logger = LoggerFactory.getLogger(this.getClass());
         PooledDataSource ds = new PooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:test;sql.syntax_pgs=true;check_props=true", "username", "password");
         ds.setDefaultAutoCommit(false);
         // ds.setPoolMaximumActiveConnections();

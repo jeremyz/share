@@ -10,8 +10,8 @@ import org.apache.ibatis.annotations.Select;
 public interface ModelMapper extends AbstractMapper<Model, Integer>
 {
     final static String attrs = " id, name ";
+    final static String from = " from models ";
     final static String where = " where id=#{id} ";
-
 
     final static String INSERT = "insert into models(name) values (#{name})";
     @Insert(INSERT)
@@ -21,19 +21,19 @@ public interface ModelMapper extends AbstractMapper<Model, Integer>
     @Update(UPDATE)
     int update(Model obj);
 
-    final static String DELETE = "delete from models" + where;
+    final static String DELETE = "delete" + from + where;
     @Delete(DELETE)
     int delete(Model obj);
 
-    final static String COUNT = "select count(*) from models";
+    final static String COUNT = "select count(*)" + from;
     @Select(COUNT)
     int count();
 
-    final static String SELECT = "select" + attrs + "from models";
+    final static String SELECT = "select" + attrs + from;
     @Select(SELECT)
     List<Model> select();
 
-    final static String SELECT_ONE = "select" + attrs + "from models" + where;
+    final static String SELECT_ONE = SELECT + where;
     @Select(SELECT_ONE)
     Model selectOne(Integer id);
 }
