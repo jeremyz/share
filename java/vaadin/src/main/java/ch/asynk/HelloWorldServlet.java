@@ -12,7 +12,7 @@ import com.vaadin.server.SessionDestroyListener;
 import com.vaadin.server.VaadinServlet;
 
 @WebServlet(value = "/*", asyncSupported = true)
-@VaadinServletConfiguration(productionMode = false, ui = ch.asynk.HelloWorld.class, closeIdleSessions = true)
+@VaadinServletConfiguration(productionMode = false, ui = ch.asynk.HelloWorldUI.class, closeIdleSessions = true)
 public class HelloWorldServlet extends VaadinServlet implements SessionInitListener, SessionDestroyListener
 {
     private static final long serialVersionUID = 511085337415583793L;

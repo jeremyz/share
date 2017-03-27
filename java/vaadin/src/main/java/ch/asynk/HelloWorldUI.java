@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 @PreserveOnRefresh
 @Title("Hello!!")
 @Theme("mytheme")
-public class HelloWorld extends UI
+public class HelloWorldUI extends UI
 {
     private static final long serialVersionUID = 511085335415683713L;
     private static Logger logger = null;

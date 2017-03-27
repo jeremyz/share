@@ -15,14 +15,15 @@ import java.nio.file.Paths;
 
 class MyVaadinJettyServer extends Server
 {
-    public MyVaadinJettyServer(int port, Class<? extends VaadinServlet> servletClass, Class<? extends UI> uiClass, String webappDirectory)
-        throws IOException, InstantiationException, IllegalAccessException
+    public MyVaadinJettyServer(int port, String webappDirectory) throws IOException
     {
         super(port);
 
-        createIfDoesntExists(webappDirectory);
         WebAppContext context = new WebAppContext(webappDirectory, "/");
-        context.addServlet(buildVaadinServlet(servletClass.newInstance(), uiClass), "/*");
+
+        context.addServlet(buildVaadinServlet(new VaadinServlet(), null), "/*");
+        context.addServlet(buildVaadinServlet(new HelloWorldServlet(), HelloWorldUI.class), "/hello/*");
+
         setHandler(context);
     }
 
@@ -30,16 +31,8 @@ class MyVaadinJettyServer extends Server
     {
         ServletHolder servletHolder = new ServletHolder(servlet);
         servletHolder.setInitParameter(VaadinServlet.SERVLET_PARAMETER_UI_PROVIDER, DefaultUIProvider.class.getName());
-        servletHolder.setInitParameter("UI", uiClass.getName());
+        if (uiClass != null) servletHolder.setInitParameter("UI", uiClass.getName());
         return servletHolder;
-    }
-
-    private void createIfDoesntExists(String directory) throws IOException
-    {
-        Path path = Paths.get(directory);
-        if (!Files.exists(path)) {
-            Files.createDirectory(path);
-        }
     }
 }
 
@@ -48,7 +41,8 @@ public class Main
     public static void main(String[] args) throws Exception
     {
         String webRoot = System.getProperty("WEBROOT");
-        if (webRoot == null) webRoot = "./src/main/WebContent/";
-        new MyVaadinJettyServer(8081, HelloWorldServlet.class, HelloWorld.class, webRoot).start();
+        if (webRoot == null) webRoot = "./src/main/WebContent";
+        System.out.println("http://127.0.0.1:8666/hello");
+        new MyVaadinJettyServer(8666, webRoot).start();
     }
 }

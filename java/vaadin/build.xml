@@ -217,6 +217,7 @@
             </fileset>
             <zipfileset src="dist/deps.jar" excludes="META-INF/*"/>
         </jar>
+        <echo message="$ java -DWEBROOT=/tmp -DTEST=1 -jar ${jar.name}"/>
     </target>
 
     <target name="run.jar" description="run jetty from application jar" depends="configure">
