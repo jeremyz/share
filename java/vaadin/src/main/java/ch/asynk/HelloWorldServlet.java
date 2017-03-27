@@ -27,6 +27,7 @@ public class HelloWorldServlet extends VaadinServlet implements SessionInitListe
     public void sessionInit(SessionInitEvent event) throws ServiceException
     {
         event.getSession().setLocale(new java.util.Locale("fr", "CH"));
+        event.getSession().setAttribute(Daddy.SESSION_STATUS, "unknown");
         System.err.println("sessionInit");
     }
 
