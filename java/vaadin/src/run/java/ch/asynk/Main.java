@@ -84,7 +84,7 @@ class HttpVaadinJettyServer extends VaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("http://127.0.0.1:" + port + "/hello");
+        System.out.println("http://localhost:" + port + "/hello");
         addConnector(httpConnector(port));
     }
 }
@@ -96,7 +96,7 @@ class HttpsVaadinJettyServer extends VaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("https://127.0.0.1:" + port + "/hello");
+        System.out.println("https://localhost:" + port + "/hello");
         addConnector(httpsConnector(port));
     }
 }
@@ -107,8 +107,8 @@ class HttpHttpsVaadinJettyServer extends HttpsVaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("http://127.0.0.1:" + port + "/hello");
-        System.out.println("https://127.0.0.1:" + (port + 1) + "/hello");
+        System.out.println("http://localhost:" + port + "/hello");
+        System.out.println("https://localhost:" + (port + 1) + "/hello");
         this.setConnectors(new Connector[] { httpConnector(port), httpsConnector(port + 1) });
     }
 }
@@ -121,6 +121,6 @@ public class Main
         String webRoot = System.getProperty("WEBROOT");
         if (webRoot == null) webRoot = "./src/main/WebContent";
 
-        new HttpVaadinJettyServer(port, webRoot).start();
+        new HttpsVaadinJettyServer(port, webRoot).start();
     }
 }

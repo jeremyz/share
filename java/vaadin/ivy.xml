@@ -22,5 +22,6 @@
         <dependency org="org.codehaus.janino" name="janino" rev="3.0.6"/>
         <dependency org="com.yahoo.platform.yui" name="yuicompressor" rev="2.4.8" conf="themes->default"/>
         <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.2.v20170220" conf="run->default"/>
+        <dependency org="com.yubico" name="u2flib-server-core" rev="0.16.0"/>
     </dependencies>
 </ivy-module>

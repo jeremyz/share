@@ -2,7 +2,7 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
     name="My Vaadin Hello World"
     basedir="."
-    default="war">
+    default="compile.all">
 
     <target name="configure">
         <property file="${basedir}/src/main/resources/Application.properties"/>
@@ -114,6 +114,11 @@
             <compilerarg value="-Xmaxerrs"/>
             <compilerarg value="10"/>
         </javac>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.js"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="compile.all" description="compile everything" depends="compile.app,compile.themes"/>
