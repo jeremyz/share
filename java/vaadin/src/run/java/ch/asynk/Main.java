@@ -44,6 +44,11 @@ abstract class VaadinJettyServer extends Server
         setHandler(context);
     }
 
+    protected void say(int port, boolean https)
+    {
+        System.out.println(String.format("%s://localhost:%d/hello", (https ? "https" : "http"), port));
+    }
+
     private ServletHolder buildVaadinServlet(VaadinServlet servlet, Class<? extends UI> uiClass)
     {
         ServletHolder servletHolder = new ServletHolder(servlet);
@@ -84,7 +89,7 @@ class HttpVaadinJettyServer extends VaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("http://localhost:" + port + "/hello");
+        say(port, false);
         addConnector(httpConnector(port));
     }
 }
@@ -96,7 +101,7 @@ class HttpsVaadinJettyServer extends VaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("https://localhost:" + port + "/hello");
+        say(port, true);
         addConnector(httpsConnector(port));
     }
 }
@@ -107,8 +112,8 @@ class HttpHttpsVaadinJettyServer extends HttpsVaadinJettyServer
     @Override
     protected void configure(int port)
     {
-        System.out.println("http://localhost:" + port + "/hello");
-        System.out.println("https://localhost:" + (port + 1) + "/hello");
+        say(port, false);
+        say(port + 1, true);
         this.setConnectors(new Connector[] { httpConnector(port), httpsConnector(port + 1) });
     }
 }
