@@ -4,6 +4,14 @@ import java.util.List;
 
 public class Main
 {
+    private static void failIf(boolean fail, String msg)
+    {
+        if (fail) {
+            System.err.println("FAIL " + msg);
+            System.exit(1);
+        }
+    }
+
     public static void main(String [] args )
     {
         try {
@@ -16,26 +24,42 @@ public class Main
         Model m;
         List<Model> models;
 
-        System.out.println("count  : " + dao.count());
+        int count = dao.count();
+        failIf(count != 2, "count()");
+        System.out.println("count  : " + count);
         models = dao.select();
+        count = models.size();
+        failIf(count != 2, "select()");
         System.out.println("select : ");
         for (Model _m : models) System.out.println(" - " +_m.toString());
 
         m = dao.selectOne(2);
+        failIf(m == null , "selectOne()");
         System.out.println("selectOne : " + m.toString());
         System.out.println("update ...");
         m.setName("adios");
         dao.update(m);
         m = dao.selectOne(2);
+        failIf(m == null , "selectOne()");
+        failIf(!m.getName().equals("adios") , "selectOne()");
         System.out.println("selectOne : " + m.toString());
-        System.out.println("delete : " + dao.delete(m));
-        System.out.println("count  : " + dao.count());
+        count = dao.delete(m);
+        failIf(count != 1, "delete()");
+        System.out.println("delete : " + count);
+        count = dao.count();
+        failIf(count != 1, "count()");
+        System.out.println("count  : " + count);
         System.out.println("insert ...");
         m = new Model(-1, "HoMySatan");
-        dao.insert(m);
-        System.out.println("count  : " + dao.count());
+        count = dao.insert(m);
+        failIf(count != 1, "insert()");
+        count = dao.count();
+        failIf(count != 2, "count()");
+        System.out.println("count  : " + count);
         System.out.println("select : ");
         models = dao.select();
+        count = models.size();
+        failIf(count != 2, "select()");
         for (Model _m : models) System.out.println(" - " +_m.toString());
     }
 }
