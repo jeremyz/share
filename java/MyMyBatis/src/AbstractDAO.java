@@ -20,9 +20,10 @@ public abstract class AbstractDAO<TObject, TMapper>
 
     static public SqlConnection getSqlConnection() { return conn; }
 
-    protected abstract class CallBack<TRet, TMapper>
+    @FunctionalInterface
+    public interface CallBack<TRet, TMapper>
     {
-        public abstract TRet call(TMapper m);
+        public TRet call(TMapper m);
     }
 
     protected int execInt(boolean commit, CallBack<Integer, TMapper> cb)
