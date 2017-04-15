@@ -26,7 +26,12 @@ public abstract class AbstractDAO<TObject, TMapper>
         public TRet call(TMapper m);
     }
 
-    protected int execInt(boolean commit, CallBack<Integer, TMapper> cb)
+    protected int execInt(CallBack<Integer, TMapper> cb)
+    {
+        return execInt(cb, false);
+    }
+
+    protected int execInt(CallBack<Integer, TMapper> cb, boolean commit)
     {
         int status = DAO_ERROR;
         SqlSession session = conn.openSqlSession();
@@ -42,32 +47,28 @@ public abstract class AbstractDAO<TObject, TMapper>
         return status;
     }
 
-    protected TObject execObject(boolean commit, CallBack<TObject, TMapper> cb)
+    protected TObject execObject(CallBack<TObject, TMapper> cb)
     {
         TObject obj = null;
         SqlSession session = conn.openSqlSession();
         try {
             obj = cb.call(session.getMapper(mapperClass));
-            if (commit) session.commit();
         }
         catch(PersistenceException e) {
-            if (commit) session.rollback();
             if (logErrors) conn.error(e);
         }
         finally { session.close(); }
         return obj;
     }
 
-    protected List<TObject> execObjects(boolean commit, CallBack<List<TObject>, TMapper> cb)
+    protected List<TObject> execObjects(CallBack<List<TObject>, TMapper> cb)
     {
         List<TObject> list = null;
         SqlSession session = conn.openSqlSession();
         try {
             list = cb.call(session.getMapper(mapperClass));
-            if (commit) session.commit();
         }
         catch(PersistenceException e) {
-            if (commit) session.rollback();
             if (logErrors) conn.error(e);
         }
         finally { session.close(); }

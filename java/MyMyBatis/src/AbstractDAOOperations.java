@@ -7,31 +7,31 @@ public abstract class AbstractDAOOperations<TObject, TIdentity, TMapper extends 
 
     public int insert(final TObject obj)
     {
-        return execInt(true, m -> m.insert(obj));
+        return execInt(m -> m.insert(obj), true);
     }
 
     public int update(final TObject obj)
     {
-        return execInt(true, m -> m.update(obj));
+        return execInt(m -> m.update(obj), true);
     }
 
     public int delete(final TObject obj)
     {
-        return execInt(true, m -> m.delete(obj));
+        return execInt(m -> m.delete(obj), true);
     }
 
     public int count()
     {
-        return execInt(false, m -> m.count());
+        return execInt(m -> m.count());
     }
 
     public List<TObject> select()
     {
-        return execObjects(false, m -> m.select());
+        return execObjects(m -> m.select());
     }
 
     public TObject selectOne(final TIdentity id)
     {
-        return execObject(false, m -> m.selectOne(id));
+        return execObject(m -> m.selectOne(id));
     }
 }
