@@ -46,6 +46,7 @@
         <ivy:resolve file="ivy.xml" log="download-only"/>
         <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
         <ivy:cachepath pathid="ivy.deps.themes" conf="themes" />
+        <ivy:cachepath pathid="ivy.deps.widgetsets" conf="widgetsets" />
         <ivy:cachepath pathid="ivy.deps.run" conf="run" />
         <ivy:cachefileset setid="ivy.deps.run.fileset" conf="run" />
         <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
@@ -97,6 +98,33 @@
         </antcall>
     </target>
 
+    <target name="-compile.widgetset">
+        <property name="widgetset.dir" value="${build.dir}/VAADIN/widgetsets/${widgetset}" />
+        <delete dir="${widgetset.dir}"/>
+        <mkdir dir="${widgetset.dir}"/>
+        <java classname="com.google.gwt.dev.Compiler" failonerror="yes" fork="true">
+            <classpath refid="ivy.deps.widgetsets"/>
+            <classpath>
+                <dirset dir="${web.dir}/VAADIN/widgetsets"/>
+            </classpath>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <arg value="-war"/>
+            <arg value="${build.dir}/VAADIN/widgetsets"/>
+            <arg value="${widgetset}"/>
+            <arg value="-logLevel"/>
+            <arg value="ERROR"/>
+            <arg value="-strict"/>
+            <arg value="-optimize"/>
+            <arg value="9"/>
+        </java>
+    </target>
+
+    <target name="compile.widgetsets" description="compile application's widgetsets" depends="configure,resolve">
+        <antcall target="-compile.widgetset" inheritRefs="true">
+            <param name="widgetset" value="mywidgetset"/>
+        </antcall>
+    </target>
+
     <target name="compile.app" description="compile server side components" depends="configure,resolve,ctags">
         <record name="build.log" loglevel="verbose" action="start" />
         <mkdir dir="${classes.dir}" />
@@ -121,7 +149,7 @@
         </copy>
     </target>
 
-    <target name="compile.all" description="compile everything" depends="compile.app,compile.themes"/>
+    <target name="compile.all" description="compile everything" depends="compile.app,compile.themes,compile.widgetsets"/>
 
     <target name="war" description="build war package" depends="configure,resolve">
         <mkdir dir="${lib.dir}"/>
@@ -141,6 +169,7 @@
             <zipfileset dir="${resources.dir}" prefix="WEB-INF/classes"/>
             <classes dir="${classes.dir}" includes="**" />
             <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
+            <zipfileset dir="${build.dir}/VAADIN/widgetsets" prefix="VAADIN/widgetsets"/>
             <fileset dir="${web.dir}">
                 <patternset>
                     <include name="*.html" />
@@ -180,6 +209,7 @@
                 <dirset dir="${build.dir}/run" />
                 <dirset dir="${resources.dir}" />
                 <dirset dir="${run.dir}/resources" />
+                <dirset dir="${build.dir}" />
             </classpath>
             <classpath refid="cp.build"/>
             <classpath refid="ivy.deps.run"/>
@@ -209,6 +239,7 @@
             <fileset dir="${classes.dir}"/>
             <fileset dir="${build.dir}/run"/>
             <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
+            <zipfileset dir="${build.dir}/VAADIN/widgetsets" prefix="VAADIN/widgetsets"/>
             <fileset dir="${web.dir}">
                 <patternset>
                     <include name="WEB-INF/*.xml" />

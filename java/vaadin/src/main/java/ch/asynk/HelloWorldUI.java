@@ -3,6 +3,7 @@ package ch.asynk;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
@@ -24,6 +25,7 @@ import ch.asynk.ui.ViewMain;
 @PreserveOnRefresh
 @Theme("mytheme")
 @Title("Hello!!")
+@Widgetset("mywidgetset")
 public class HelloWorldUI extends UI
 {
     private static final long serialVersionUID = 1L;
