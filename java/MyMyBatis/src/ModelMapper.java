@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Select;
 
-public interface ModelMapper extends AbstractMapper<Model, Integer>
+public interface ModelMapper extends AbstractMapper<Integer, Model>
 {
     final static String attrs = " id, name ";
     final static String from = " from models ";

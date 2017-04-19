@@ -4,7 +4,7 @@ import java.util.List;
 
 public abstract class AbstractDAOOperations<TIdentity,
        TObject extends AbstractModel<TIdentity>,
-       TMapper extends AbstractMapper<TObject, TIdentity>> extends AbstractDAO<TObject, TMapper>
+       TMapper extends AbstractMapper<TIdentity, TObject>> extends AbstractDAO<TObject, TMapper>
 {
 
     public int insert(final TObject obj)

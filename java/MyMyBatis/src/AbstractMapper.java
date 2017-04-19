@@ -2,7 +2,7 @@ package ch.asynk;
 
 import java.util.List;
 
-public interface AbstractMapper<TObject, TIdentity>
+public interface AbstractMapper<TIdentity, TObject>
 {
     int insert(TObject obj);
 
