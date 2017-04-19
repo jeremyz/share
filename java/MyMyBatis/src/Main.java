@@ -38,7 +38,7 @@ public class Main
         System.out.println("selectOne : " + m.toString());
         System.out.println("update ...");
         m.setName("adios");
-        dao.update(m);
+        dao.save(m);
         m = dao.selectOne(2);
         failIf(m == null , "selectOne()");
         failIf(!m.getName().equals("adios") , "selectOne()");
@@ -50,8 +50,8 @@ public class Main
         failIf(count != 1, "count()");
         System.out.println("count  : " + count);
         System.out.println("insert ...");
-        m = new Model(-1, "HoMySatan");
-        count = dao.insert(m);
+        m = new Model("HoMySatan");
+        count = dao.save(m);
         failIf(count != 1, "insert()");
         count = dao.count();
         failIf(count != 2, "count()");

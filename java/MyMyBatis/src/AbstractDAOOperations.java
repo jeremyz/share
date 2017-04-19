@@ -2,7 +2,9 @@ package ch.asynk;
 
 import java.util.List;
 
-public abstract class AbstractDAOOperations<TObject, TIdentity, TMapper extends AbstractMapper<TObject, TIdentity>> extends AbstractDAO<TObject, TMapper>
+public abstract class AbstractDAOOperations<TIdentity,
+       TObject extends AbstractModel<TIdentity>,
+       TMapper extends AbstractMapper<TObject, TIdentity>> extends AbstractDAO<TObject, TMapper>
 {
 
     public int insert(final TObject obj)
@@ -13,6 +15,11 @@ public abstract class AbstractDAOOperations<TObject, TIdentity, TMapper extends 
     public int update(final TObject obj)
     {
         return execInt(m -> m.update(obj), true);
+    }
+
+    public int save(final TObject obj)
+    {
+        return (obj.isUnsaved() ? insert(obj) : update(obj));
     }
 
     public int delete(final TObject obj)

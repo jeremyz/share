@@ -2,7 +2,7 @@ package ch.asynk;
 
 import java.util.List;
 
-public class ModelDAO extends AbstractDAOOperations<Model, Integer, ModelMapper> implements ModelMapper
+public class ModelDAO extends AbstractDAOOperations<Integer, Model, ModelMapper> implements ModelMapper
 {
     private static final ModelDAO instance = new ModelDAO();
 
