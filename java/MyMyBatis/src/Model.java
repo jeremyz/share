@@ -3,7 +3,7 @@ package ch.asynk;
 import lombok.Setter;
 import lombok.Getter;
 
-public class Model implements AbstractModel<Integer>
+public class Model implements AbstractModel<Integer, Model>
 {
     private @Setter @Getter Integer id;
     private @Setter @Getter String name;
@@ -23,6 +23,18 @@ public class Model implements AbstractModel<Integer>
     public boolean isUnsaved()
     {
         return (id == null);
+    }
+
+    @Override
+    public Model self()
+    {
+        return this;
+    }
+
+    @Override
+    public ModelMapper getDAO()
+    {
+        return ModelDAO.getInstance();
     }
 
     @Override

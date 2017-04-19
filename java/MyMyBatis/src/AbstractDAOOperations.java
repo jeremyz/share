@@ -3,7 +3,7 @@ package ch.asynk;
 import java.util.List;
 
 public abstract class AbstractDAOOperations<TIdentity,
-       TObject extends AbstractModel<TIdentity>,
+       TObject extends AbstractModel<TIdentity, TObject>,
        TMapper extends AbstractMapper<TIdentity, TObject>> extends AbstractDAO<TObject, TMapper>
 {
 

@@ -38,12 +38,12 @@ public class Main
         System.out.println("selectOne : " + m.toString());
         System.out.println("update ...");
         m.setName("adios");
-        dao.save(m);
+        m.save();
         m = dao.selectOne(2);
         failIf(m == null , "selectOne()");
         failIf(!m.getName().equals("adios") , "selectOne()");
         System.out.println("selectOne : " + m.toString());
-        count = dao.delete(m);
+        count = m.delete();
         failIf(count != 1, "delete()");
         System.out.println("delete : " + count);
         count = dao.count();
@@ -51,7 +51,7 @@ public class Main
         System.out.println("count  : " + count);
         System.out.println("insert ...");
         m = new Model("HoMySatan");
-        count = dao.save(m);
+        m.save();
         failIf(count != 1, "insert()");
         count = dao.count();
         failIf(count != 2, "count()");

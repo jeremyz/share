@@ -4,6 +4,8 @@ import java.util.List;
 
 public interface AbstractMapper<TIdentity, TObject>
 {
+    int save(TObject obj);
+
     int insert(TObject obj);
 
     int update(TObject obj);
