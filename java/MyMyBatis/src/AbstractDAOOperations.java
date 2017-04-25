@@ -41,4 +41,9 @@ public abstract class AbstractDAOOperations<TIdentity,
     {
         return execObject(m -> m.selectOne(id));
     }
+
+    public TObject selectSelf(final TObject obj)
+    {
+        return execObject(m -> m.selectSelf(obj));
+    }
 }

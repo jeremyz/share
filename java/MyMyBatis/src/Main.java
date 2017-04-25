@@ -39,10 +39,11 @@ public class Main
         System.out.println("update ...");
         m.setName("adios");
         m.save();
-        m = dao.selectOne(2);
-        failIf(m == null , "selectOne()");
-        failIf(!m.getName().equals("adios") , "selectOne()");
-        System.out.println("selectOne : " + m.toString());
+        m.setName("wrong");
+        m.reload();
+        failIf(m == null , "reload()");
+        failIf(!m.getName().equals("adios") , "selectSelf()");
+        System.out.println("selectSelf : " + m.toString());
         count = m.delete();
         failIf(count != 1, "delete()");
         System.out.println("delete : " + count);

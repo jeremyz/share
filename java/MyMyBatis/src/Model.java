@@ -42,4 +42,10 @@ public class Model implements AbstractModel<Integer, Model>
     {
         return String.format("model [%d] %s", id, name);
     }
+
+    @Override
+    public void feedFrom(Model other)
+    {
+        this.name = other.name;
+    }
 }

@@ -36,4 +36,8 @@ public interface ModelMapper extends AbstractMapper<Integer, Model>
     final static String SELECT_ONE = SELECT + where;
     @Select(SELECT_ONE)
     Model selectOne(Integer id);
+
+    final static String SELECT_SELF = SELECT + where;
+    @Select(SELECT_SELF)
+    Model selectSelf(Model obj);
 }

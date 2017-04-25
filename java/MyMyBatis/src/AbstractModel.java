@@ -11,5 +11,9 @@ public interface AbstractModel<TIdentity, TObject>
     default void save() { getDAO().save(self()); }
 
     default int delete() { return getDAO().delete(self()); }
+
+    default void reload() { feedFrom(getDAO().selectSelf(self())); }
+
+    void feedFrom(TObject obj);
 }
 

@@ -17,4 +17,6 @@ public interface AbstractMapper<TIdentity, TObject>
     List<TObject> select();
 
     TObject selectOne(TIdentity id);
+
+    TObject selectSelf(TObject obj);
 }
