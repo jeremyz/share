@@ -4,6 +4,7 @@ import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -19,6 +20,13 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 import ch.asynk.security.U2fConnector;
+
+class Login
+{
+    private String login;
+    public String getLogin() { return login; }
+    public void setLogin(final String login) { this.login = login; }
+}
 
 public class ViewMain extends TabSheet implements View, U2fConnector.U2fListener
 {
@@ -55,30 +63,23 @@ public class ViewMain extends TabSheet implements View, U2fConnector.U2fListener
 
     private Component u2fComponent(final String title, Action action)
     {
+        final Login login = new Login();
         final TextField tf = new TextField();
-        tf.setRequired(true);
-        tf.setInputPrompt("username");
-        tf.addValidator(new RegexpValidator("^(?=.{6,20}$)[a-zA-Z][a-zA-Z0-9#@.]+[a-zA-Z]$", "invalid username"));
-
-        final ViewMain instance = this;
         final Button bt = new Button(title.toLowerCase());
-        bt.addClickListener(new Button.ClickListener() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                try {
-                    tf.validate();
-                    String userId = tf.getValue();
-                    tf.setValue("");
-                    if (action == Action.U2F_REGISTER)
-                        u2fConnector.sendRegisterRequest(userId, instance);
-                    else if (action == Action.U2F_AUTHENTICATE)
-                        u2fConnector.startAuthentication(userId, instance);
-                } catch (com.yubico.u2f.exceptions.U2fBadConfigurationException e) {
-                    Notification.show(U2F_TITLE, e.getMessage(), Notification.Type.ERROR_MESSAGE);
-                } catch (Exception e) {
-                    Notification.show("invalid user name");
-                }
+        final Binder<Login> binder = new Binder<>();
+        binder.addValueChangeListener(evt -> bt.setEnabled(binder.isValid()) );
+        binder.forField(tf)
+            .asRequired("Login required")
+            .withValidator(s -> s.length() >= 6, "at least 6 characters")
+            .withValidator(s -> s.length() <= 20, "at most 20 characters")
+            .withValidator(new RegexpValidator("invalid username", "^(?=.{6,20}$)[a-zA-Z][a-zA-Z0-9#@.]+[a-zA-Z]$"))
+            .bind(Login::getLogin, Login::setLogin);
+
+        bt.setEnabled(false);
+        bt.addClickListener(e -> {
+            if (binder.writeBeanIfValid(login)) {
+                tf.setValue("");
+                tryAction(action, login);
             }
         });
 
@@ -99,6 +100,20 @@ public class ViewMain extends TabSheet implements View, U2fConnector.U2fListener
         vl.addComponent(panel);
         vl.setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
         return vl;
+    }
+
+    private void tryAction(Action action, Login login)
+    {
+        final String userId = login.getLogin();
+        login.setLogin(null);
+        try {
+            if (action == Action.U2F_REGISTER)
+                u2fConnector.sendRegisterRequest(userId, this);
+            else if (action == Action.U2F_AUTHENTICATE)
+                u2fConnector.startAuthentication(userId, this);
+        } catch (com.yubico.u2f.exceptions.U2fBadConfigurationException ex) {
+            Notification.show(U2F_TITLE, ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+        }
     }
 
     public void u2fCallback(U2fConnector.U2fAction action, String msg)
