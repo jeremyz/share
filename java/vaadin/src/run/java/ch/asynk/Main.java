@@ -24,29 +24,28 @@ import java.nio.file.Paths;
 
 abstract class VaadinJettyServer extends Server
 {
-    public VaadinJettyServer(int port, String webappDirectory)
+    public VaadinJettyServer(int port, final String webappDirectory, final String contextPath)
     {
         super();
-        configure(port);
-        buildWebapp(webappDirectory);
+        configure(port, contextPath);
+        buildWebapp(webappDirectory, contextPath);
     }
 
-    abstract protected void configure(int port);
+    abstract protected void configure(int port, final String contextPath);
 
-    protected void buildWebapp(String webappDirectory)
+    protected void buildWebapp(final String webappDirectory, final String contextPath)
     {
 
-        WebAppContext context = new WebAppContext(webappDirectory, "/");
+        WebAppContext context = new WebAppContext(webappDirectory, contextPath);
 
-        context.addServlet(buildVaadinServlet(new VaadinServlet(), null), "/*");
-        context.addServlet(buildVaadinServlet(new HelloWorldServlet(), HelloWorldUI.class), "/hello/*");
+        context.addServlet(buildVaadinServlet(new HelloWorldServlet(), HelloWorldUI.class), "/*");
 
         setHandler(context);
     }
 
-    protected void say(int port, boolean https)
+    protected void say(int port, boolean https, final String contextPath)
     {
-        System.out.println(String.format("%s://localhost:%d/hello", (https ? "https" : "http"), port));
+        System.out.println(String.format("%s://localhost:%d%s", (https ? "https" : "http"), port, contextPath));
     }
 
     private ServletHolder buildVaadinServlet(VaadinServlet servlet, Class<? extends UI> uiClass)
@@ -84,36 +83,36 @@ abstract class VaadinJettyServer extends Server
 
 class HttpVaadinJettyServer extends VaadinJettyServer
 {
-    public HttpVaadinJettyServer(int port, String webappDirectory) { super(port, webappDirectory); }
+    public HttpVaadinJettyServer(int port, final String webappDirectory, final String contextPath) { super(port, webappDirectory, contextPath); }
 
     @Override
-    protected void configure(int port)
+    protected void configure(int port, final String contextPath)
     {
-        say(port, false);
+        say(port, false, contextPath);
         addConnector(httpConnector(port));
     }
 }
 
 class HttpsVaadinJettyServer extends VaadinJettyServer
 {
-    public HttpsVaadinJettyServer(int port, String webappDirectory) { super(port, webappDirectory); }
+    public HttpsVaadinJettyServer(int port, final String webappDirectory, final String contextPath) { super(port, webappDirectory, contextPath); }
 
     @Override
-    protected void configure(int port)
+    protected void configure(int port, final String contextPath)
     {
-        say(port, true);
+        say(port, true, contextPath);
         addConnector(httpsConnector(port));
     }
 }
 class HttpHttpsVaadinJettyServer extends HttpsVaadinJettyServer
 {
-    public HttpHttpsVaadinJettyServer(int port, String webappDirectory) { super(port, webappDirectory); }
+    public HttpHttpsVaadinJettyServer(int port, final String webappDirectory, final String contextPath) { super(port, webappDirectory, contextPath); }
 
     @Override
-    protected void configure(int port)
+    protected void configure(int port, final String contextPath)
     {
-        say(port, false);
-        say(port + 1, true);
+        say(port, false, contextPath);
+        say(port + 1, true, contextPath);
         this.setConnectors(new Connector[] { httpConnector(port), httpsConnector(port + 1) });
     }
 }
@@ -126,6 +125,6 @@ public class Main
         String webRoot = System.getProperty("WEBROOT");
         if (webRoot == null) webRoot = "./src/main/WebContent";
 
-        new HttpsVaadinJettyServer(port, webRoot).start();
+        new HttpsVaadinJettyServer(port, webRoot, "/test").start();
     }
 }
