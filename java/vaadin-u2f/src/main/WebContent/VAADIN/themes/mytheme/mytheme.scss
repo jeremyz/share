@@ -1,0 +1,17 @@
+
+@import "../valo/valo.scss";
+
+@mixin mytheme {
+    @include valo;
+    .v-app { background-color: #e6e6e9; }
+    .mybg { background-color: #e6e6e6; }
+    .v-verticallayout-margin-top { padding-top: $v-layout-margin-top; }
+    .v-verticallayout-margin-right { padding-right: $v-layout-margin-top; }
+    .v-menubar {
+        .v-menubar-menuitem-menuRight {
+            position: absolute;
+            right: 10px;
+            top: 0;
+        }
+    }
+}

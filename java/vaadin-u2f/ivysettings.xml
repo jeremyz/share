@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+    <settings defaultResolver="default" />
+    <!-- <caches defaultCacheDir="${basedir}/lib" /> -->
+    <!-- <caches default="mine" defaultCacheDir="${basedir}/ivy"> -->
+    <!--     <cache  name="mine" basedir="${basedir}/ivy" /> -->
+    <!-- </caches> -->
+    <resolvers>
+        <chain name="default">
+            <ibiblio name="maven2" m2compatible="true"/>
+            <ibiblio name="maven" m2compatible="true" usepoms="false"/>
+            <ibiblio name="vaadin-addons" usepoms="true" m2compatible="true"
+                root="http://maven.vaadin.com/vaadin-addons" />
+            <!-- <ibiblio name="vaadin-prereleases" usepoms="true" m2compatible="true" -->
+            <!--     root="http://maven.vaadin.com/vaadin-prereleases" /> -->
+            <filesystem name="local"> 
+                <ivy pattern="${user.home}/ivy-local/[revision]/[module]/ivy-[revision].xml"/>
+                <artifact pattern="${user.home}/ivy-local/[revision]/[module]/[module]-[revision](-[classifier]).[ext]"/>
+            </filesystem>
+        </chain>
+    </resolvers>
+</ivysettings>

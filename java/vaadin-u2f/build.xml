@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+    name="My Vaadin Hello World"
+    basedir="."
+    default="compile.all">
+
+    <target name="configure">
+        <property file="${basedir}/src/main/resources/Application.properties"/>
+
+        <property name="main.dir"       value="${basedir}/src/main" />
+        <property name="run.dir"        value="${basedir}/src/run" />
+        <property name="build.dir"      value="${basedir}/build"/>
+        <property name="dist.dir"       value="${basedir}/dist"/>
+
+        <property name="src.dir"        value="${main.dir}/java" />
+        <property name="web.dir"        value="${main.dir}/WebContent"/>
+        <property name="resources.dir"  value="${main.dir}/resources"/>
+        <property name="classes.dir"    value="${build.dir}/WEB-INF/classes"/>
+        <property name="lib.dir"        value="${build.dir}/WEB-INF/lib"/>
+
+        <property name="war.name"       value="${app.name}-${app.version}.war"/>
+        <property name="jar.name"       value="${app.name}-${app.version}.jar"/>
+        <property name="run.name"       value="ch.asynk.Main"/>
+
+        <property name="compile.debug"          value="true"/>
+        <property name="compile.deprecation"    value="false"/>
+        <property name="compile.optimize"       value="true"/>
+
+        <property file="${basedir}/tomcat.properties"/>
+        <path id="cp.tomcat">
+            <fileset dir="${catalina.home}/bin">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${catalina.home}/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+        <taskdef classpathref="cp.tomcat" resource="org/apache/catalina/ant/catalina.tasks" />
+        <path id="cp.build">
+            <dirset dir="${classes.dir}" />
+        </path>
+    </target>
+
+
+    <target name="resolve" description="retrieve dependencies with Ivy">
+        <ivy:resolve file="ivy.xml" log="download-only"/>
+        <ivy:cachepath pathid="ivy.deps.server-side" conf="server-side" />
+        <ivy:cachepath pathid="ivy.deps.themes" conf="themes" />
+        <ivy:cachepath pathid="ivy.deps.widgetsets" conf="widgetsets" />
+        <ivy:cachepath pathid="ivy.deps.run" conf="run" />
+        <ivy:cachefileset setid="ivy.deps.run.fileset" conf="run" />
+        <ivy:cachefileset setid="ivy.deps.server-side.fileset" conf="server-side"/>
+    </target>
+
+    <target name="ivy-report" depends="configure,resolve">
+        <ivy:report conf="server-side" organisation="ch.asynk" module="${app.name}"/>
+    </target>
+
+    <target name="clean" depends="configure" description="clean project">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete file="build.log" />
+        <delete file="test.log" />
+        <delete file="ivy-report.css" />
+        <delete>
+            <fileset dir="${basedir}" includes="ch.asynk-${app.name}-*"/>
+            <fileset dir="${basedir}" includes="**/*.cache"/>
+        </delete>
+    </target>
+
+    <target name="ctags" depends="configure">
+        <exec executable="ctags" failonerror="false">
+            <arg value="-R"/>
+            <arg value="--language-force=java"/>
+            <arg value="-f.tags"/>
+            <arg value="${src.dir}"/>
+        </exec>
+    </target>
+
+    <target name="-compile.theme" >
+        <property name="theme.dir"       value="${build.dir}/VAADIN/themes/${theme}" />
+        <delete dir="${theme.dir}"/>
+        <mkdir dir="${theme.dir}"/>
+        <java classname="com.vaadin.sass.SassCompiler" failonerror="yes" fork="true">
+            <classpath refid="ivy.deps.themes"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <arg value="-ignore-warnings:true"/>
+            <arg value="-compress:true"/>
+            <arg value="-minify:true"/>
+            <arg value="${web.dir}/VAADIN/themes/${theme}/styles.scss"/>
+            <arg value="${theme.dir}/styles.css"/>
+        </java>
+    </target>
+
+    <target name="compile.themes" description="compile application's themes" depends="configure,resolve">
+        <antcall target="-compile.theme" inheritRefs="true">
+            <param name="theme" value="mytheme"/>
+        </antcall>
+    </target>
+
+    <target name="-compile.widgetset">
+        <property name="widgetset.dir" value="${build.dir}/VAADIN/widgetsets/${widgetset}" />
+        <delete dir="${widgetset.dir}"/>
+        <mkdir dir="${widgetset.dir}"/>
+        <java classname="com.google.gwt.dev.Compiler" failonerror="yes" fork="true">
+            <classpath refid="ivy.deps.widgetsets"/>
+            <classpath>
+                <dirset dir="${web.dir}/VAADIN/widgetsets"/>
+            </classpath>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <arg value="-war"/>
+            <arg value="${build.dir}/VAADIN/widgetsets"/>
+            <arg value="${widgetset}"/>
+            <arg value="-logLevel"/>
+            <arg value="ERROR"/>
+            <arg value="-strict"/>
+            <arg value="-optimize"/>
+            <arg value="9"/>
+        </java>
+    </target>
+
+    <target name="compile.widgetsets" description="compile application's widgetsets" depends="configure,resolve">
+        <antcall target="-compile.widgetset" inheritRefs="true">
+            <param name="widgetset" value="mywidgetset"/>
+        </antcall>
+    </target>
+
+    <target name="compile.app" description="compile server side components" depends="configure,resolve,ctags">
+        <record name="build.log" loglevel="verbose" action="start" />
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${main.dir}"
+            destdir="${classes.dir}"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="cp.tomcat"/>
+            <classpath refid="ivy.deps.server-side"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.js"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.all" description="compile everything" depends="compile.app,compile.themes,compile.widgetsets"/>
+
+    <target name="war" description="build war package" depends="configure,resolve">
+        <mkdir dir="${lib.dir}"/>
+        <copy todir="${lib.dir}" flatten="true">
+            <fileset refid="ivy.deps.server-side.fileset"/>
+        </copy>
+        <delete>
+            <fileset dir="${lib.dir}">
+                <include name="**/*-sources.jar"/>
+                <include name="**/*-javadoc.jar"/>
+            </fileset>
+        </delete>
+
+        <delete file="${dist.dir}/${war.name}"/>
+        <war destfile="${dist.dir}/${war.name}"
+            webxml="${web.dir}/WEB-INF/web.xml">
+            <zipfileset dir="${resources.dir}" prefix="WEB-INF/classes"/>
+            <classes dir="${classes.dir}" includes="**" />
+            <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
+            <zipfileset dir="${build.dir}/VAADIN/widgetsets" prefix="VAADIN/widgetsets"/>
+            <fileset dir="${web.dir}">
+                <patternset>
+                    <include name="*.html" />
+                    <include name="VAADIN/widgetsets/**/*" />
+                    <include name="VAADIN/themes/**/fonts/**/*" />
+                    <include name="VAADIN/themes/**/icons/**/*" />
+                    <include name="VAADIN/themes/**/images/**/*" />
+                    <include name="WEB-INF/lib/*" />
+                    <include name="WEB-INF/*.xml" />
+                </patternset>
+            </fileset>
+            <zipfileset dir="${lib.dir}" prefix="WEB-INF/lib"/>
+        </war>
+    </target>
+
+    <target name="compile.run" depends="configure,resolve">
+        <mkdir dir="${build.dir}/run" />
+        <javac srcdir="${run.dir}"
+            destdir="${build.dir}/run"
+            debug="${compile.debug}"
+            deprecation="${compile.deprecation}"
+            optimize="${compile.optimize}"
+            includeantruntime="false">
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.run"/>
+            <compilerarg value="-Xlint:all"/>
+            <compilerarg value="-Xlint:-path"/>
+            <compilerarg value="-Xlint:-processing"/>
+            <compilerarg value="-Xmaxerrs"/>
+            <compilerarg value="10"/>
+        </javac>
+    </target>
+
+    <target name="run" description="run jetty in source tree" depends="configure,resolve">
+        <java classname="${run.name}" fork="true">
+            <classpath>
+                <dirset dir="${build.dir}/run" />
+                <dirset dir="${resources.dir}" />
+                <dirset dir="${run.dir}/resources" />
+                <dirset dir="${build.dir}" />
+            </classpath>
+            <classpath refid="cp.build"/>
+            <classpath refid="ivy.deps.run"/>
+            <jvmarg value="-DTEST=1"/>
+        </java>
+    </target>
+
+    <target name="-jar.deps.check" unless="-jar.deps.exists">
+        <available property="-jar.deps.exists" file="dist/deps.jar"/>
+    </target>
+
+    <target name="-jar.deps" unless="-jar.deps.exists" depends="configure,resolve">
+        <jar jarfile="dist/deps.jar">
+            <zipgroupfileset refid="ivy.deps.run.fileset"/>
+        </jar>
+    </target>
+
+    <target name="jar" description="build runnable jar" depends="-jar.deps.check,-jar.deps">
+        <delete file="${dist.dir}/${jar.name}"/>
+        <jar jarfile="${dist.dir}/${jar.name}">
+            <manifest>
+                <attribute name="Main-Class" value="${run.name}"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${resources.dir}"/>
+            <fileset dir="${run.dir}/resources"/>
+            <fileset dir="${classes.dir}"/>
+            <fileset dir="${build.dir}/run"/>
+            <zipfileset dir="${build.dir}/VAADIN/themes" prefix="VAADIN/themes"/>
+            <zipfileset dir="${build.dir}/VAADIN/widgetsets" prefix="VAADIN/widgetsets"/>
+            <fileset dir="${web.dir}">
+                <patternset>
+                    <include name="WEB-INF/*.xml" />
+                    <include name="WEB-INF/lib/*" />
+                    <include name="*.html" />
+                    <include name="VAADIN/widgetsets/**/*" />
+                    <include name="VAADIN/themes/**/fonts/**/*" />
+                    <include name="VAADIN/themes/**/icons/**/*" />
+                    <include name="VAADIN/themes/**/images/**/*" />
+                </patternset>
+            </fileset>
+            <zipfileset src="dist/deps.jar" excludes="META-INF/*"/>
+        </jar>
+        <echo message="$ java -DWEBROOT=/tmp -DTEST=1 -jar ${jar.name}"/>
+    </target>
+
+    <target name="run.jar" description="run jetty from application jar" depends="configure">
+        <java jar="${dist.dir}/${jar.name}" fork="true">
+            <jvmarg value="-DTEST=1"/>
+        </java>
+    </target>
+
+    <!-- tomcat specific targets -->
+
+    <target name="remove" depends="configure" description="remove application on servlet container">
+        <undeploy url="${manager.url}"
+            username="${manager.username}"
+            password="${manager.password}"
+            path="${app.path}"
+            failonerror="false"/>
+    </target>
+
+
+    <target name="install" depends="war,remove" description="install application to servlet container">
+        <copy  todir="/tmp" file="${dist.dir}/${war.name}"/>
+        <deploy url="${manager.url}"
+            username="${manager.username}"
+            password="${manager.password}"
+            path="${app.path}"
+            localWar="file://tmp/${war.name}"/>
+        <delete file="/tmp/${war.name}"/>
+    </target>
+
+</project>
