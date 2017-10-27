@@ -26,16 +26,6 @@
         <property name="compile.deprecation"    value="false"/>
         <property name="compile.optimize"       value="true"/>
 
-        <property file="${basedir}/tomcat.properties"/>
-        <path id="cp.tomcat">
-            <fileset dir="${catalina.home}/bin">
-                <include name="*.jar"/>
-            </fileset>
-            <fileset dir="${catalina.home}/lib">
-                <include name="*.jar"/>
-            </fileset>
-        </path>
-        <taskdef classpathref="cp.tomcat" resource="org/apache/catalina/ant/catalina.tasks" />
         <path id="cp.build">
             <dirset dir="${classes.dir}" />
         </path>
@@ -134,7 +124,6 @@
             deprecation="${compile.deprecation}"
             optimize="${compile.optimize}"
             includeantruntime="false">
-            <classpath refid="cp.tomcat"/>
             <classpath refid="ivy.deps.server-side"/>
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-path"/>
@@ -260,27 +249,6 @@
         <java jar="${dist.dir}/${jar.name}" fork="true">
             <jvmarg value="-DTEST=1"/>
         </java>
-    </target>
-
-    <!-- tomcat specific targets -->
-
-    <target name="remove" depends="configure" description="remove application on servlet container">
-        <undeploy url="${manager.url}"
-            username="${manager.username}"
-            password="${manager.password}"
-            path="${app.path}"
-            failonerror="false"/>
-    </target>
-
-
-    <target name="install" depends="war,remove" description="install application to servlet container">
-        <copy  todir="/tmp" file="${dist.dir}/${war.name}"/>
-        <deploy url="${manager.url}"
-            username="${manager.username}"
-            password="${manager.password}"
-            path="${app.path}"
-            localWar="file://tmp/${war.name}"/>
-        <delete file="/tmp/${war.name}"/>
     </target>
 
 </project>
