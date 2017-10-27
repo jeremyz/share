@@ -4,12 +4,14 @@ import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -33,6 +35,10 @@ public class ViewMain extends TabSheet implements View, U2fConnector.U2fListener
     private static final long serialVersionUID = 1L;
 
     private static final String U2F_TITLE = "FIDO U2F (Universal 2nd factor)";
+
+    private static final String l1 = "https://demo.yubico.com/u2f";
+    private static final String l2 = "https://developers.yubico.com/U2F/App_ID.html";
+    private static final String l3 = "https://developers.yubico.com/U2F/Libraries/Client_error_codes.html";
 
     private final Window u2fWindow;
     private final U2fConnector u2fConnector;
@@ -98,8 +104,18 @@ public class ViewMain extends TabSheet implements View, U2fConnector.U2fListener
         vl.setMargin(true);
         vl.setSizeFull();
         vl.addComponent(panel);
+        vl.addComponent(setLink(l1));
+        vl.addComponent(setLink(l2));
+        vl.addComponent(setLink(l3));
         vl.setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
         return vl;
+    }
+
+    private Link setLink(final String url)
+    {
+        Link link = new Link(url, new ExternalResource(url));
+        link.setTargetName("_blank");
+        return link;
     }
 
     private void tryAction(Action action, Login login)
