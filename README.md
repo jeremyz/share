@@ -13,7 +13,7 @@
    * [project](./java/project) ant + ivy + logback + runnable jar
    * [StateLessStateMachineTest.java](./java/StateLessStateMachineTest.java)
    * [vaadin](./java/vaadin) ant + ivy + tomcat7/jetty + logback + __u2f support__ + runnable jar
-   * [vaadin-uf2](./java/vaadin-uf2) ant + ivy + jetty + logback + __u2f support__ + runnable jar
+   * [vaadin-u2f](./java/vaadin-u2f) ant + ivy + jetty + logback + __u2f support__ + runnable jar
  * [README.md](./README.md)
 
  generated with $ [tree2md](https://github.com/jeremyz/bin/blob/master/tree2md) -L 2
