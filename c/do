@@ -1,6 +1,9 @@
 #! /bin/sh
+BROWN="\033[0;33m"
+RESET="\033[0m"
 for c in *.c
 do
-    echo "############" && clang -pedantic -Wall -ldl $c -o ./bin && ./bin
+    echo -e "###> $BROWN${c}$RESET <###" && clang -pedantic -Wall -ldl $c -o ./bin && ./bin
+    echo
 done
 rm ./bin

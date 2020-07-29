@@ -1,8 +1,12 @@
 #! /bin/sh
+BROWN="\033[0;33m"
+RESET="\033[0m"
 for java in *.java
 do
-    echo "############" && javac $java && java ${java%.java}
+    echo -e "###> $BROWN${java}$RESET <###" && javac $java && java ${java%.java}
+    echo
 done
+echo -e "###> ${BROWN}MyMyBatis$RESET <###"
 pushd MyMyBatis > /dev/null
 rm -fr build && ant && rm -fr build
 popd
