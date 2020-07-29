@@ -27,7 +27,7 @@ class TryState extends CommonState
 
         say();
 
-        int i = (new Random()).nextInt(6);
+        int i = (new Random()).nextInt(3);
         switch (i) {
             case 1:
                 System.out.println("   -> Success");
